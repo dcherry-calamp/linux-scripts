@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# This script will be executed *after* all the other init scripts.
+# You can put your own initialization stuff in here if you don't
+# want to do the full Sys V style init stuff.
+
+touch /var/lock/subsys/local
+if [ ! -d /root/.ssh ]; then
+  mkdir -m 0700 -p /root/.ssh
+  restorecon /root/.ssh
+fi
+
+# Get the root ssh key setup
+ReTry=0
+while [ ! -f /root/.ssh/authorized_keys ] && [ $ReTry -lt 5 ]; do
+  sleep 2
+  curl -f http://169.254.169.254/latest/meta-data/public-keys/0/openssh-key > /root/.ssh/authorized_keys
+  ReTry=$[Retry+1]
+done
+chmod 600 /root/.ssh/authorized_keys && restorecon /root/.ssh/authorized_keys
+
+# get user-data and run it
+if [ ! -f /var/local/firstboot.log ]; then
+  /usr/local/bin/firstboot.sh
+fi

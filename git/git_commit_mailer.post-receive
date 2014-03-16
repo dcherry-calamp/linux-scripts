@@ -1,0 +1,23 @@
+#!/bin/bash
+
+REPONAME="UNCONFIGURED_REPO_NAME"
+MAILTO="change-tracker@_somedomain.com_"
+
+while read oldrev newrev ref
+do
+    BRANCH=`echo $ref | cut -d/ -f3`
+    
+    COMMITTER=`git log -n1 --pretty=format:"%an" ${BRANCH}`
+    shortSummary=$(git log -1 --pretty=format:"%s" ${BRANCH} | perl -e 'while(<>){print substr($_, 0, 50)."...";}')
+    SUBJECT=`git log -n1 --pretty=format:"[Git] repo: ${REPONAME}; branch: ${BRANCH}; commit: %h; \"${shortSummary}\" - (%an)" ${BRANCH}`
+    SUMMARY_LIST=`git diff --summary --stat ${BRANCH}^ ${BRANCH}`
+    MAIL_BODY=`git log -n1 --pretty=medium ${BRANCH}`
+    MAIL_BODY="${MAIL_BODY} 
+    -----------------------------
+ 
+"
+    MAIL_BODY="${MAIL_BODY}${SUMMARY_LIST}"
+    
+    echo "${MAIL_BODY}" | /bin/mail -s "${SUBJECT}" ${MAILTO}
+done
+
