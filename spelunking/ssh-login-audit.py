@@ -4,9 +4,10 @@
 # This utility does a simple system audit on the local host, printing 
 # relevant information about system security. 
 #
-# Author: Devin Cherry <youshoulduseunix@gmail.com>
+# Author: Devin Cherry <devincherry@gmail.com>
 ##
 import re, os, sys, commands, tempfile
+
 
 # flags for capabilities logic
 SSH_ROOT_LOGIN_ENABLED = 1
@@ -18,6 +19,10 @@ USER_PASSWD_VALID = 32
 USER_PASSWD_BLANK = 64
 USER_SSH_PUBKEY_EXISTS = 128
 
+
+if sys.version_info < (2, 6): 
+    sys.stderr.write("ERROR: this script requires python 2.6+!\n")
+    sys.exit(1)
 
 if os.geteuid() != 0:
     sys.stderr.write("ERROR: you must run this script as root!\n")
